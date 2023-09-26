@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 
 namespace SharpAutomation
 {
@@ -37,12 +38,36 @@ namespace SharpAutomation
         }
 
         /// <summary>
+        /// Converts a list of exceptions to a JSON representation.
+        /// </summary>
+        /// <param name="exceptions">The list of exceptions to convert to JSON.</param>
+        /// <returns>A JSON representation of the exceptions.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the 'exceptions' parameter is null.</exception>
+        public static string ToJSON(this List<Exception> exceptions)
+        {
+            if (exceptions == null)
+                throw new ArgumentNullException(nameof(exceptions));
+
+            var exceptionDtos = exceptions.Select(exception => new
+            {
+                exception.Message,
+                exception.StackTrace,
+                TypeName = exception.GetType().FullName
+            });
+
+            return JsonSerializer.Serialize(exceptionDtos, new JsonSerializerOptions
+            {
+                WriteIndented = true // Set this to true for pretty-printing the JSON
+            });
+        }
+
+        /// <summary>
         /// Logs a list of exceptions to a file asynchronously.
         /// </summary>
         /// <param name="exceptions">The list of exceptions to log.</param>
-        /// <param name="filePath">The path to the file where exceptions will be logged. Default: AppDomain.CurrentDomain.BaseDirectory.</param>
+        /// <param name="logFilePath">The path to the file where exceptions will be logged. Default: AppDomain.CurrentDomain.BaseDirectory.</param>
         /// <exception cref="ArgumentNullException">Thrown when the 'exceptions' parameter is null.</exception>
-        public static async Task LogToAsync(this List<Exception> exceptions, string filePath = "")
+        public static async Task ToLogAsync(this List<Exception> exceptions, string logFilePath = "")
         {
             if (exceptions == null)
                 throw new ArgumentNullException(nameof(exceptions));
@@ -50,7 +75,7 @@ namespace SharpAutomation
             if (exceptions.Count == 0)
                 return;
 
-            if (string.IsNullOrEmpty(filePath)) filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exceptions.log");
+            if (string.IsNullOrEmpty(logFilePath)) logFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Exceptions.log");
 
             var stringBuilder = new StringBuilder();
 
@@ -61,11 +86,67 @@ namespace SharpAutomation
                 stringBuilder.AppendLine($"Message: {exception.Message}");
                 stringBuilder.AppendLine($"StackTrace: {exception.StackTrace}");
                 stringBuilder.AppendLine();
+                stringBuilder.AppendLine("----------------------------------------------------------------------------");
+                stringBuilder.AppendLine();
             }
 
-            using var writer = new StreamWriter(filePath, true, Encoding.UTF8);
+            using var writer = new StreamWriter(logFilePath, true, Encoding.UTF8);
                 
             await writer.WriteLineAsync(stringBuilder.ToString());
+        }
+
+        /// <summary>
+        /// Filters exceptions in the list by a specified exception type.
+        /// </summary>
+        /// <typeparam name="T">The type of exception to filter by.</typeparam>
+        /// <param name="exceptions">The list of exceptions to filter.</param>
+        /// <returns>A list of exceptions filtered by the specified type.</returns>
+        public static List<Exception> FilterByType<T>(this List<Exception> exceptions) where T : Exception
+        {
+            return exceptions.Where(e => e.GetType() == typeof(T)).ToList();
+        }
+
+        /// <summary>
+        /// Flattens exception messages into a single string with newline separators.
+        /// </summary>
+        /// <param name="exceptions">The list of exceptions to flatten messages from.</param>
+        /// <returns>A string containing flattened exception messages.</returns>
+        public static string FlattenMessages(this List<Exception> exceptions)
+        {
+            return string.Join(Environment.NewLine, exceptions.Select(e => e.Message));
+        }
+
+        /// <summary>
+        /// Checks if the list contains exceptions of a specified type.
+        /// </summary>
+        /// <typeparam name="T">The type of exception to check for.</typeparam>
+        /// <param name="exceptions">The list of exceptions to check.</param>
+        /// <returns>True if the list contains exceptions of the specified type; otherwise, false.</returns>
+        public static bool ContainsType<T>(this List<Exception> exceptions) where T : Exception
+        {
+            return exceptions.Any(e => e.GetType() == typeof(T));
+        }
+
+        /// <summary>
+        /// Counts the occurrences of each exception type in the list.
+        /// </summary>
+        /// <param name="exceptions">The list of exceptions to count by type.</param>
+        /// <returns>A dictionary where keys are exception type names and values are their occurrence counts.</returns>
+        public static Dictionary<string, int> CountByType(this List<Exception> exceptions)
+        {
+            var typeCounts = new Dictionary<string, int>();
+
+            foreach (var exception in exceptions)
+            {
+                string typeName = exception.GetType().FullName ?? "";
+
+                if (typeCounts.ContainsKey(typeName))
+                    typeCounts[typeName]++;
+                else
+                    typeCounts[typeName] = 1;
+            }
+
+            return typeCounts;
         }
     }
 }
