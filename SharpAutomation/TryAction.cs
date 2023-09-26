@@ -13,31 +13,29 @@
         /// <param name="retries">The number of times to retry the action in case of exceptions (default is 0).</param>
         /// <param name="waitBetweenTriesSeconds">The wait time in seconds between retries (default is 0).</param>
         /// <returns>
-        /// A list of exceptions that occurred during the execution of the action.
+        /// A boolean value that represents whether the action was ultimately executed successfully.
         /// </returns>
-        public static async Task<List<Exception>> RunAsync(Action action, List<Exception>? _exceptionList = null, int retries = 0, int waitBetweenTriesSeconds = 0)
+        public static async Task<bool> RunAsync(Action action, List<Exception>? _exceptionList = null, int retries = 0, int waitBetweenTriesSeconds = 0)
         {
             int retryCount = 0;
-            var exceptionList = new List<Exception>();
 
             while (retryCount <= retries)
             {
                 try
                 {
                     await Task.Run(action);
-                    break;
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     _exceptionList?.Add(ex);
-                    exceptionList.Add(ex);
                 }
 
                 await Task.Delay(waitBetweenTriesSeconds * 1000);
                 retryCount++;
             }
 
-            return exceptionList;
+            return false;
         }
     }
 }
