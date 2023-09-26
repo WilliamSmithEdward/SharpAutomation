@@ -12,8 +12,8 @@
 	<PackageProjectUrl>https://github.com/WilliamSmithEdward/SharpAutomation</PackageProjectUrl>
     <PackageTags>sharp;automation;email;notifications;exceptionhandling;async</PackageTags>
 	<Deterministic>false</Deterministic>
-	<AssemblyVersion>1.0.2</AssemblyVersion>
-	<PackageVersion>1.0.2</PackageVersion>
+	<AssemblyVersion>1.0.3</AssemblyVersion>
+	<PackageVersion>1.0.3</PackageVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
