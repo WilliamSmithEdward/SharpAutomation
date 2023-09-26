@@ -134,17 +134,11 @@ namespace SharpAutomation
         /// <returns>A dictionary where keys are exception type names and values are their occurrence counts.</returns>
         public static Dictionary<string, int> CountByType(this List<Exception> exceptions)
         {
-            var typeCounts = new Dictionary<string, int>();
-
-            foreach (var exception in exceptions)
+            var typeCounts = exceptions.GroupBy(x => x.GetType()).Select(x => new
             {
-                string typeName = exception.GetType().FullName ?? "";
-
-                if (typeCounts.ContainsKey(typeName))
-                    typeCounts[typeName]++;
-                else
-                    typeCounts[typeName] = 1;
-            }
+                TypeName = x.Key.FullName ?? string.Empty,
+                Count = x.Count()
+            }).ToDictionary(x => x.TypeName, x => x.Count);
 
             return typeCounts;
         }
