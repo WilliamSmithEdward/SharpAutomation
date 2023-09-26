@@ -8,10 +8,12 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Description>SharpAutomation is a C# library that helps you build smarter automation and workflows.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/WilliamSmithEdward/SharpAutomation</RepositoryUrl>
+    <RepositoryUrl></RepositoryUrl>
+	<PackageProjectUrl>https://github.com/WilliamSmithEdward/SharpAutomation</PackageProjectUrl>
     <PackageTags>sharp;automation;email;notifications;exceptionhandling;async</PackageTags>
-    <AssemblyVersion>1.0.1</AssemblyVersion>
-    <FileVersion>1.0.1</FileVersion>
+	<Deterministic>false</Deterministic>
+	<AssemblyVersion>1.0.1</AssemblyVersion>
+	<PackageVersion>1.0.1</PackageVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
