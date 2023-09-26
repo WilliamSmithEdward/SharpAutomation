@@ -12,6 +12,7 @@
     <PackageTags>sharp;automation;email;notifications;exceptionhandling;async</PackageTags>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <FileVersion>1.0.0</FileVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
