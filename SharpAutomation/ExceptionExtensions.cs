@@ -8,16 +8,6 @@ namespace SharpAutomation
     public static class ExceptionExtensions
     {
         /// <summary>
-        /// Converts an exception to a JSON representation.
-        /// </summary>
-        /// <param name="exception">The exception to convert to JSON.</param>
-        /// <returns>A JSON representation of the exception.</returns>
-        public static string ToJSON(this Exception exception)
-        {
-            return new List<Exception>() { exception }.ToJSON();
-        }
-
-        /// <summary>
         /// Converts an exception to an HTML representation for display purposes.
         /// </summary>
         /// <param name="exception">The exception to convert to HTML.</param>
@@ -25,6 +15,16 @@ namespace SharpAutomation
         public static string ToHTML(this Exception exception)
         {
             return new List<Exception>() { exception }.ToHTML();
+        }
+
+        /// <summary>
+        /// Converts an exception to a JSON representation.
+        /// </summary>
+        /// <param name="exception">The exception to convert to JSON.</param>
+        /// <returns>A JSON representation of the exception.</returns>
+        public static string ToJSON(this Exception exception)
+        {
+            return new List<Exception>() { exception }.ToJSON();
         }
 
         /// <summary>

@@ -117,8 +117,16 @@ namespace SharpAutomation
         }
     }
 
-    internal static class NotificationConfigurationExtensions
+    /// <summary>
+    /// Extension methods for sending notifications using the provided notification configuration and SMTP server configuration.
+    /// </summary>
+    public static class NotificationConfigurationExtensions
     {
+        /// <summary>
+        /// Sends a notification using the provided notification configuration and SMTP server configuration.
+        /// </summary>
+        /// <param name="notificationConfiguration">The notification configuration.</param>
+        /// <param name="smtpConfiguration">The SMTP server configuration.</param>
         public static void SendNotification(this NotificationConfiguration notificationConfiguration, SMTPServerConfiguration smtpConfiguration)
         {
             Notification.Send(smtpConfiguration, notificationConfiguration);
