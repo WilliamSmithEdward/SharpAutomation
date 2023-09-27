@@ -116,4 +116,12 @@ namespace SharpAutomation
             Attachments = attachments ?? new List<string>();
         }
     }
+
+    internal static class NotificationConfigurationExtensions
+    {
+        public static void SendNotification(this NotificationConfiguration notificationConfiguration, SMTPServerConfiguration smtpConfiguration)
+        {
+            Notification.Send(smtpConfiguration, notificationConfiguration);
+        }
+    }
 }
