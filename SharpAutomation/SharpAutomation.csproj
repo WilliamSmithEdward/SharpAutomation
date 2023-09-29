@@ -7,7 +7,7 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Description>SharpAutomation is a C# library that helps you build smarter automation and workflows.</Description>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReadmeFile>nugetREADME.md</PackageReadmeFile>
     <RepositoryUrl></RepositoryUrl>
 	<PackageProjectUrl>https://github.com/WilliamSmithEdward/SharpAutomation</PackageProjectUrl>
     <PackageTags>sharp;automation;email;notifications;exceptionhandling;async</PackageTags>
@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\README.md">
+    <None Include="..\nugetREADME.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
