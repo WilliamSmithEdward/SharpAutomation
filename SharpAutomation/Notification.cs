@@ -26,6 +26,11 @@ namespace SharpAutomation
                 IsBodyHtml = true
             };
 
+            foreach (var replyTo in notificationConfiguration.ReplyTo)
+            {
+                message.ReplyToList.Add(replyTo);
+            }
+
             foreach (var toAddress in notificationConfiguration.ToAddresses) message.To.Add(toAddress);
 
             if (notificationConfiguration.CCAddresses != null)
@@ -92,12 +97,17 @@ namespace SharpAutomation
         /// <summary>
         /// Gets the list of CC (carbon copy) recipient email addresses.
         /// </summary>
-        public List<string> CCAddresses { get; private set; } = new List<string>();
+        public List<string> CCAddresses { get; private set; } = [];
 
         /// <summary>
         /// Gets the list of file paths to be attached to the notification email.
         /// </summary>
-        public List<string> Attachments { get; private set; } = new List<string>();
+        public List<string> Attachments { get; private set; } = [];
+
+        /// <summary>
+        ///  Gets the list of reply to email addresses.
+        /// </summary>
+        public List<string> ReplyTo { get; private set; } = [];
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NotificationConfiguration"/> class with specified parameters.
@@ -107,13 +117,15 @@ namespace SharpAutomation
         /// <param name="htmlBody">The HTML content of the notification email (optional).</param>
         /// <param name="ccAddresses">The list of CC (carbon copy) recipient email addresses (optional).</param>
         /// <param name="attachments">The list of file paths to be attached to the notification email (optional).</param>
-        public NotificationConfiguration(List<string> toAddresses, string subject, string htmlBody, List<string>? ccAddresses = null, List<string>? attachments = null)
+        /// <param name="replyTo">The list of reply to email addresses (optional).</param>
+        public NotificationConfiguration(List<string> toAddresses, string subject, string htmlBody, List<string>? ccAddresses = null, List<string>? attachments = null, List<string>? replyTo = null)
         {
             ToAddresses = toAddresses;
             Subject = subject;
             HTMLBody = htmlBody;
-            CCAddresses = ccAddresses ?? new List<string>();
-            Attachments = attachments ?? new List<string>();
+            CCAddresses = ccAddresses ?? [];
+            Attachments = attachments ?? [];
+            ReplyTo = replyTo ?? [];
         }
     }
 
