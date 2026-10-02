@@ -23,9 +23,9 @@ SharpAutomation is a library. It opens no port, listens for nothing and
 starts no process. What it reads, writes and reaches:
 
 - **Network.** `Notification.Send` and `SendNotification` connect to the
-  SMTP server named in `SMTPServerConfiguration`, on port 25, through
-  `System.Net.Mail.SmtpClient`, and send one message. Nothing else in the
-  library uses the network.
+  SMTP server and port named in `SMTPServerConfiguration`, through
+  `System.Net.Mail.SmtpClient`, and send one message, over STARTTLS when
+  `EnableSsl` is set. Nothing else in the library uses the network.
 - **Files read.** `Notification.Send` reads each file named in
   `NotificationConfiguration.Attachments`, to attach it. Nothing else is
   read.
@@ -40,16 +40,22 @@ starts no process. What it reads, writes and reaches:
 Every path, address and message comes from the calling program. Input that
 makes the library read or write a file other than the ones above, send mail
 to an address the caller did not give, add a mail header, or run code
-counts as a vulnerability. So does mail sent without TLS when the caller
-asked for it.
+counts as a vulnerability. So does mail, or any address in it, sent
+without TLS when `EnableSsl` is set, or to a server whose certificate the
+machine does not trust.
 
 ### Mail
 
-Version 1.0.6.3 sends mail on port 25 without TLS and without
-authentication, so the message, its attachments and any exception details
-in it cross the network in clear text. Use it only with a relay on a
-network you trust. `System.Net.Mail` refuses a line break in a subject or
-an address, so headers cannot be added through them.
+Set `EnableSsl = true` on `SMTPServerConfiguration` wherever the server
+offers STARTTLS. The connection is then encrypted before any address or
+content is sent, and a server without STARTTLS, or with a certificate the
+machine does not trust or that does not match the server's name, is
+refused. `EnableSsl` is off by default, and version 1.0.6.3 had no such
+setting: without it the message, its attachments and any exception details
+in it cross the network in clear text, so use that only with a relay on a
+network you trust. The library has no setting for a user name and
+password. `System.Net.Mail` refuses a line break in a subject or an
+address, so headers cannot be added through them.
 
 ### Exception text in mail and logs
 

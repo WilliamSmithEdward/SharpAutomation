@@ -77,7 +77,7 @@ net9.0 and net10.0. What an agent working here must not break:
   CI runs them with `--fail-skips on`. Every file a test writes, log files
   included, goes to a `TempFolder` under the system temp folder, never to the
   application folder. Tests never send real mail: a test that sends talks
-  only to an in-process fake SMTP server on 127.0.0.1, and every other
+  only to `FakeSmtpServer`, in-process on 127.0.0.1, and every other
   server and address in a test is reserved for examples (`example.com`,
   `.invalid`). A fix comes with a test that fails without it.
 - **XML docs.** CI builds with warnings as errors, so every public member

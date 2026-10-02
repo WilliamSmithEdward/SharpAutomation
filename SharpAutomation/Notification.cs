@@ -8,13 +8,19 @@ namespace SharpAutomation
     public class Notification
     {
         /// <summary>
-        /// Sends an HTML mail through the SMTP server on port 25, without TLS and without authentication.
+        /// Sends an HTML mail through the SMTP server on <see cref="SMTPServerConfiguration.Port"/>, without
+        /// authentication. With <see cref="SMTPServerConfiguration.EnableSsl"/> the connection is encrypted with
+        /// STARTTLS and the server's certificate is checked before anything is sent; otherwise the mail goes unencrypted.
         /// </summary>
         /// <param name="smtpConfiguration">The SMTP server configuration.</param>
         /// <param name="notificationConfiguration">The notification configuration.</param>
         /// <exception cref="ArgumentException">Thrown when the 'toAddresses' list in notification configuration is empty.</exception>
         /// <exception cref="FormatException">Thrown when an address is not a valid mail address.</exception>
-        /// <exception cref="SmtpException">Thrown when the server cannot be reached or refuses the mail.</exception>
+        /// <exception cref="SmtpException">Thrown when the server cannot be reached, refuses the mail, or, with
+        /// <see cref="SMTPServerConfiguration.EnableSsl"/>, does not offer STARTTLS.</exception>
+        /// <exception cref="System.Security.Authentication.AuthenticationException">Thrown, with
+        /// <see cref="SMTPServerConfiguration.EnableSsl"/>, when the server's certificate is not trusted or does not
+        /// match its name.</exception>
         public static void Send(SMTPServerConfiguration smtpConfiguration, NotificationConfiguration notificationConfiguration)
         {
             if (notificationConfiguration.ToAddresses.Count == 0)
@@ -45,7 +51,10 @@ namespace SharpAutomation
                 foreach (var attachment in notificationConfiguration.Attachments)
                     message.Attachments.Add(new Attachment(attachment));
 
-            new SmtpClient(smtpConfiguration.SMTPServerAddress).Send(message);
+            new SmtpClient(smtpConfiguration.SMTPServerAddress, smtpConfiguration.Port)
+            {
+                EnableSsl = smtpConfiguration.EnableSsl
+            }.Send(message);
         }
     }
 
@@ -54,8 +63,10 @@ namespace SharpAutomation
     /// </summary>
     public class SMTPServerConfiguration
     {
+        private int _port = 25;
+
         /// <summary>
-        /// Gets or sets the SMTP server's host name or IP address. The server is reached on port 25.
+        /// Gets or sets the SMTP server's host name or IP address.
         /// </summary>
         public string SMTPServerAddress { get; set; }
 
@@ -63,6 +74,28 @@ namespace SharpAutomation
         /// Gets or sets the sender's email address.
         /// </summary>
         public string FromAddress { get; set; }
+
+        /// <summary>
+        /// Gets or sets the port the SMTP server listens on. Default: 25. Mail submission with STARTTLS usually uses 587.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the value is not between 1 and 65535.</exception>
+        public int Port
+        {
+            get => _port;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, 1);
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, 65535);
+                _port = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether the connection is encrypted with STARTTLS before the mail is sent. Default: false, which
+        /// sends the mail unencrypted. When true, a server that does not offer STARTTLS, or whose certificate is not
+        /// trusted or does not match <see cref="SMTPServerAddress"/>, is refused before anything is sent.
+        /// </summary>
+        public bool EnableSsl { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SMTPServerConfiguration"/> class with specified SMTP server address and sender address.
