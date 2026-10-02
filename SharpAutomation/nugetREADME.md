@@ -140,10 +140,10 @@ mail.SendNotification(smtp);   // the same as Notification.Send(smtp, mail)
 ## Exceptions as text
 
 - `ToHTML`, `ToJSON` and `ToLogAsync` work on one exception or a `List<Exception>`, and write the type's full name, the `Message` and the `StackTrace` of each exception. They do not include `InnerException`, the inner exceptions of an `AggregateException`, or `Data`.
-- `ToHTML` returns an HTML fragment, a heading and a table, for the body of a mail. It inserts the type name, message and stack trace as they are, without HTML encoding.
+- `ToHTML` returns an HTML fragment, a heading and a table, for the body of a mail. It HTML-encodes the type name, message and stack trace, so a message such as `<b>Disk full</b>` shows as written, tags and all, and cannot add markup to the mail.
 - `ToJSON` returns an indented JSON array of objects with `Message`, `StackTrace` and `TypeName`. `StackTrace` is `null` for an exception that was never thrown. `System.Text.Json` escapes `<`, `>` and `&` in the strings.
 - `FilterByType<T>()` and `ContainsType<T>()` match the exact type: a `FileNotFoundException` is not counted as an `IOException`. `CountByType()` returns a dictionary from each type's full name to its count. `FlattenMessages()` joins the messages with `Environment.NewLine`.
-- These methods throw `ArgumentNullException` for a null list, except `ToHTML`, which throws `NullReferenceException`.
+- These methods throw `ArgumentNullException` for a null list or a null exception.
 
 ## Log files
 
@@ -166,7 +166,6 @@ mail.SendNotification(smtp);   // the same as Notification.Send(smtp, mail)
 ## Security
 
 - Exception messages and stack traces can hold file paths, server names, user names, and sometimes connection strings or other secrets. `ToHTML`, `ToJSON` and the log methods copy them unchanged, so send the mail and keep the log files only where those details may be read.
-- `ToHTML` does not encode what it inserts. A message that holds HTML, such as one that quotes input from a file or a web response, becomes part of the mail's HTML.
 - A line break in a logged entry or message starts a new line in the log file, so text that you log can look like another entry.
 - An attachment path is read with the permissions of the process. Do not build one from input you do not control.
 
@@ -174,7 +173,6 @@ mail.SendNotification(smtp);   // the same as Notification.Send(smtp, mail)
 
 These are fixed in the next release.
 
-- `ToHTML` does not HTML-encode the exception's type name, message or stack trace, and closes each exception's table rows once more than it opens them.
 - Mail cannot use TLS or a port other than 25.
 - `Notification.Send` does not dispose the message or the `SmtpClient`, so attachment files stay open, and cannot be deleted on Windows, until the garbage collector closes them, and the connection to the server is dropped without a `QUIT`.
 - `Log.WriteEntryAsync` is `async void`. An exception from it, such as `DirectoryNotFoundException` for a missing folder, is thrown on the thread pool and ends the process. A long entry may still be being written when it returns.
@@ -184,7 +182,7 @@ These are fixed in the next release.
 - An `async` lambda passed to `TryAction.RunAsync` becomes `async void`: `RunAsync` returns `true` when the lambda reaches its first `await`, does not wait for it to finish, and an exception it throws later ends the process instead of reaching the exception list.
 - `TryAction.Run` and `RunAsync` wait `waitBetweenTriesSeconds` after the last failed attempt too.
 - A negative `retries` returns `false` without calling the action. A negative `waitBetweenTriesSeconds` throws `ArgumentOutOfRangeException` from `Run` or `RunAsync` after the first failed attempt, and one above 2,147,483 overflows when converted to milliseconds, so it throws the same or waits the wrong time.
-- `ToHTML` on a null list, and `Notification.Send` with a null configuration or a null `ToAddresses`, throw `NullReferenceException`.
+- `Notification.Send` with a null configuration or a null `ToAddresses` throws `NullReferenceException`.
 
 ## Attributions
 
