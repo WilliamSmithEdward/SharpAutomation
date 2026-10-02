@@ -6,7 +6,7 @@ SharpAutomation is a small library for automation scripts and scheduled jobs. It
 dotnet add package SharpAutomation
 ```
 
-Everything is in the `SharpAutomation` namespace. The package targets net8.0 and has no dependencies.
+Everything is in the `SharpAutomation` namespace. The package targets net8.0, net9.0 and net10.0 and has no dependencies. .NET 8 leaves Microsoft support on 2026-11-10, and a later release will drop net8.0.
 
 ---
 
