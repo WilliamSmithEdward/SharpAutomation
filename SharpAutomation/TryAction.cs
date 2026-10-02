@@ -6,12 +6,15 @@
     public static class TryAction
     {
         /// <summary>
-        /// Executes an action synchronously and captures any exceptions that may occur.
+        /// Calls an action up to <paramref name="retries"/> + 1 times, until one call returns without throwing, and
+        /// catches every exception it throws.
         /// </summary>
         /// <param name="action">The action to be executed.</param>
-        /// <param name="retries">The number of times to retry the action in case of exceptions (default is 0).</param>
-        /// <param name="waitBetweenTriesSeconds">The wait time in seconds between retries (default is 0).</param>
-        /// <param name="_exceptionList">An optional list to which exceptions will be added in case of errors.</param>
+        /// <param name="retries">The number of times to call the action again after a call that throws (default is 0).</param>
+        /// <param name="waitBetweenTriesSeconds">The seconds to block the thread after each call that throws, the last one
+        /// included (default is 0).</param>
+        /// <param name="_exceptionList">An optional list that receives each exception the action throws. Without one,
+        /// the exceptions are discarded.</param>
         /// <returns>
         /// A boolean value that represents whether the action was ultimately executed successfully.
         /// </returns>
@@ -39,12 +42,16 @@
         }
 
         /// <summary>
-        /// Executes an action asynchronously and captures any exceptions that may occur.
+        /// Calls an action on the thread pool up to <paramref name="retries"/> + 1 times, until one call returns without
+        /// throwing, and catches every exception it throws. Pass synchronous code only: an <c>async</c> lambda becomes
+        /// <c>async void</c>, is not awaited, and its exceptions are not caught.
         /// </summary>
         /// <param name="action">The action to be executed.</param>
-        /// <param name="retries">The number of times to retry the action in case of exceptions (default is 0).</param>
-        /// <param name="waitBetweenTriesSeconds">The wait time in seconds between retries (default is 0).</param>
-        /// <param name="_exceptionList">An optional list to which exceptions will be added in case of errors.</param>
+        /// <param name="retries">The number of times to call the action again after a call that throws (default is 0).</param>
+        /// <param name="waitBetweenTriesSeconds">The seconds to wait after each call that throws, the last one included
+        /// (default is 0).</param>
+        /// <param name="_exceptionList">An optional list that receives each exception the action throws. Without one,
+        /// the exceptions are discarded.</param>
         /// <returns>
         /// A boolean value that represents whether the action was ultimately executed successfully.
         /// </returns>

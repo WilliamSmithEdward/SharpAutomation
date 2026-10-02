@@ -9,10 +9,11 @@ namespace SharpAutomation
     public static class ExceptionListExtensions
     {
         /// <summary>
-        /// Converts a list of exceptions to an HTML representation for display purposes.
+        /// Converts a list of exceptions to an HTML fragment, a heading and a table holding each exception's type name,
+        /// message and stack trace. The text is inserted without HTML encoding, and inner exceptions are not included.
         /// </summary>
         /// <param name="exceptions">The list of exceptions to convert to HTML.</param>
-        /// <returns>An HTML representation of the exceptions for display.</returns>
+        /// <returns>The HTML fragment.</returns>
         public static string ToHTML(this List<Exception> exceptions)
         {
             var html = "<br /><br /><h2>Exceptions:</h2>";
@@ -38,10 +39,11 @@ namespace SharpAutomation
         }
 
         /// <summary>
-        /// Converts a list of exceptions to a JSON representation.
+        /// Converts a list of exceptions to an indented JSON array holding one object per exception, with its
+        /// <c>Message</c>, <c>StackTrace</c> and <c>TypeName</c>. Inner exceptions are not included.
         /// </summary>
         /// <param name="exceptions">The list of exceptions to convert to JSON.</param>
-        /// <returns>A JSON representation of the exceptions.</returns>
+        /// <returns>The JSON text.</returns>
         /// <exception cref="ArgumentNullException">Thrown when the 'exceptions' parameter is null.</exception>
         public static string ToJSON(this List<Exception> exceptions)
         {
@@ -62,10 +64,12 @@ namespace SharpAutomation
         }
 
         /// <summary>
-        /// Logs a list of exceptions to a file asynchronously.
+        /// Appends each exception's timestamp, type name, message and stack trace to a log file. An empty list writes nothing.
         /// </summary>
         /// <param name="exceptions">The list of exceptions to log.</param>
-        /// <param name="logFilePath">The path to the file where exceptions will be logged. Default: AppDomain.CurrentDomain.BaseDirectory.</param>
+        /// <param name="logFilePath">The file to append to. Default: <c>Exceptions.log</c> in AppDomain.CurrentDomain.BaseDirectory.
+        /// A relative path is resolved against the current directory. The file is created if missing; its folder is not.</param>
+        /// <returns>A task that completes when the entries are written.</returns>
         /// <exception cref="ArgumentNullException">Thrown when the 'exceptions' parameter is null.</exception>
         public static async Task ToLogAsync(this List<Exception> exceptions, string logFilePath = "")
         {
@@ -96,11 +100,12 @@ namespace SharpAutomation
         }
 
         /// <summary>
-        /// Filters exceptions in the list by a specified exception type.
+        /// Returns the exceptions in the list whose type is exactly <typeparamref name="T"/>. Exceptions of a type derived
+        /// from <typeparamref name="T"/> are not included.
         /// </summary>
         /// <typeparam name="T">The type of exception to filter by.</typeparam>
         /// <param name="exceptions">The list of exceptions to filter.</param>
-        /// <returns>A list of exceptions filtered by the specified type.</returns>
+        /// <returns>A new list of the matching exceptions, in their original order.</returns>
         public static List<Exception> FilterByType<T>(this List<Exception> exceptions) where T : Exception
         {
             return exceptions.Where(e => e.GetType() == typeof(T)).ToList();
@@ -117,11 +122,12 @@ namespace SharpAutomation
         }
 
         /// <summary>
-        /// Checks if the list contains exceptions of a specified type.
+        /// Checks whether the list holds an exception whose type is exactly <typeparamref name="T"/>. Exceptions of a type
+        /// derived from <typeparamref name="T"/> do not count.
         /// </summary>
         /// <typeparam name="T">The type of exception to check for.</typeparam>
         /// <param name="exceptions">The list of exceptions to check.</param>
-        /// <returns>True if the list contains exceptions of the specified type; otherwise, false.</returns>
+        /// <returns>True if the list holds an exception of exactly that type; otherwise, false.</returns>
         public static bool ContainsType<T>(this List<Exception> exceptions) where T : Exception
         {
             return exceptions.Any(e => e.GetType() == typeof(T));
@@ -131,7 +137,7 @@ namespace SharpAutomation
         /// Counts the occurrences of each exception type in the list.
         /// </summary>
         /// <param name="exceptions">The list of exceptions to count by type.</param>
-        /// <returns>A dictionary where keys are exception type names and values are their occurrence counts.</returns>
+        /// <returns>A dictionary from each exception type's full name to the number of exceptions of exactly that type.</returns>
         public static Dictionary<string, int> CountByType(this List<Exception> exceptions)
         {
             var typeCounts = exceptions.GroupBy(x => x.GetType()).Select(x => new
