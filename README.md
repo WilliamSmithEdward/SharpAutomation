@@ -56,7 +56,21 @@ Console.WriteLine(copied);        // True, or False after three failed attempts
 Console.WriteLine(errors.Count);  // 0, or one exception per failed attempt
 ```
 
-`RunAsync` takes an `Action`, so pass it synchronous code only. An `async` lambda passed to it becomes an `async void` method; see "Known problems in 1.0.6.3" below.
+An `async` lambda, or any lambda that returns a task, goes to the `RunAsync` overload for a `Func<Task>`. It awaits each attempt, catches what the task ends with, and takes a cancellation token:
+
+```csharp
+using SharpAutomation;
+
+var errors = new List<Exception>();
+using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+
+bool saved = await TryAction.RunAsync(async () =>
+{
+    await File.WriteAllTextAsync("status.txt", "Import finished", timeout.Token);
+}, retries: 3, waitBetweenTriesSeconds: 10, _exceptionList: errors, cancellationToken: timeout.Token);
+
+Console.WriteLine(saved);         // True
+```
 
 ## Work with the exceptions
 
@@ -145,9 +159,9 @@ mail.SendNotification(smtp);   // the same as Notification.Send(smtp, mail)
 ## Retries
 
 - `TryAction.Run(action, retries, waitBetweenTriesSeconds, _exceptionList)` calls `action` up to `retries + 1` times and returns `true` as soon as one call returns. It catches every exception the action throws, of any type, and adds it to `_exceptionList` when you pass one; without a list the exceptions are dropped. It returns `false` when every attempt threw.
-- After each attempt that throws, `Run` blocks the thread for `waitBetweenTriesSeconds` seconds with `Thread.Sleep`, and `RunAsync` waits with `Task.Delay`. Both also wait after the last attempt, before returning `false`.
-- `RunAsync` runs each attempt with `Task.Run`, on a thread-pool thread. It has no cancellation token.
-- `retries` and `waitBetweenTriesSeconds` default to 0, which means one attempt and no wait.
+- After an attempt that throws, `Run` blocks the thread for `waitBetweenTriesSeconds` seconds with `Thread.Sleep`, and `RunAsync` waits with `Task.Delay`, before the next attempt. There is no wait after the last attempt.
+- `RunAsync(Action)` runs each attempt with `Task.Run`, on a thread-pool thread. `RunAsync(Func<Task>)` calls the delegate and awaits its task; the compiler picks it for an `async` lambda. Its `cancellationToken` stops the retries: once it is cancelled no further attempt starts, a wait ends early, and the returned task ends with `OperationCanceledException`, which is not added to the list. Code compiled against 1.0.6.3 that passes an `async` lambda calls the `Action` overload, which does not await it, until it is compiled again.
+- `retries` and `waitBetweenTriesSeconds` default to 0, which means one attempt and no wait. A negative value of either, or a wait above 2,147,483 seconds, throws `ArgumentOutOfRangeException` before the action runs, and a null action throws `ArgumentNullException`.
 
 ## Exceptions as text
 
@@ -181,14 +195,6 @@ mail.SendNotification(smtp);   // the same as Notification.Send(smtp, mail)
 
 - Exception messages and stack traces can hold file paths, server names, user names, and sometimes connection strings or other secrets. `ToHTML`, `ToJSON` and the log methods copy them unchanged, so send the mail and keep the log files only where those details may be read.
 - An attachment path is read with the permissions of the process. Do not build one from input you do not control.
-
-## Known problems in 1.0.6.3
-
-These are fixed in the next release.
-
-- An `async` lambda passed to `TryAction.RunAsync` becomes `async void`: `RunAsync` returns `true` when the lambda reaches its first `await`, does not wait for it to finish, and an exception it throws later ends the process instead of reaching the exception list.
-- `TryAction.Run` and `RunAsync` wait `waitBetweenTriesSeconds` after the last failed attempt too.
-- A negative `retries` returns `false` without calling the action. A negative `waitBetweenTriesSeconds` throws `ArgumentOutOfRangeException` from `Run` or `RunAsync` after the first failed attempt, and one above 2,147,483 overflows when converted to milliseconds, so it throws the same or waits the wrong time.
 
 ## Attributions
 
