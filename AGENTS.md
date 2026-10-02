@@ -70,5 +70,15 @@ net9.0 and net10.0. What an agent working here must not break:
   .NET 8 leaves Microsoft support on 2026-11-10, and the owner will drop
   net8.0 in a later release. Change the list only on the owner's decision,
   and update `ci.yml`, `publish.yml` and the READMEs with it.
+- **Tests.** `SharpAutomation.Tests` is an xUnit v3 project run by
+  Microsoft.Testing.Platform (`global.json` opts `dotnet test` in), on
+  net8.0, net9.0 and net10.0:
+  `dotnet test --solution SharpAutomation.sln -c Release --fail-skips on`.
+  CI runs them with `--fail-skips on`. Every file a test writes, log files
+  included, goes to a `TempFolder` under the system temp folder, never to the
+  application folder. Tests never send real mail: a test that sends talks
+  only to an in-process fake SMTP server on 127.0.0.1, and every other
+  server and address in a test is reserved for examples (`example.com`,
+  `.invalid`). A fix comes with a test that fails without it.
 - **XML docs.** CI builds with warnings as errors, so every public member
   needs an XML doc comment.
