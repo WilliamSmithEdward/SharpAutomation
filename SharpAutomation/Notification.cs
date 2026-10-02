@@ -8,11 +8,13 @@ namespace SharpAutomation
     public class Notification
     {
         /// <summary>
-        /// Sends a notification email using the specified SMTP server and notification configuration.
+        /// Sends an HTML mail through the SMTP server on port 25, without TLS and without authentication.
         /// </summary>
         /// <param name="smtpConfiguration">The SMTP server configuration.</param>
         /// <param name="notificationConfiguration">The notification configuration.</param>
         /// <exception cref="ArgumentException">Thrown when the 'toAddresses' list in notification configuration is empty.</exception>
+        /// <exception cref="FormatException">Thrown when an address is not a valid mail address.</exception>
+        /// <exception cref="SmtpException">Thrown when the server cannot be reached or refuses the mail.</exception>
         public static void Send(SMTPServerConfiguration smtpConfiguration, NotificationConfiguration notificationConfiguration)
         {
             if (notificationConfiguration.ToAddresses.Count == 0)
@@ -53,7 +55,7 @@ namespace SharpAutomation
     public class SMTPServerConfiguration
     {
         /// <summary>
-        /// Gets or sets the SMTP server address.
+        /// Gets or sets the SMTP server's host name or IP address. The server is reached on port 25.
         /// </summary>
         public string SMTPServerAddress { get; set; }
 
@@ -90,7 +92,7 @@ namespace SharpAutomation
         public string Subject { get; private set; }
 
         /// <summary>
-        /// Gets or sets the HTML content of the notification email (optional).
+        /// Gets the HTML content of the notification email.
         /// </summary>
         public string? HTMLBody { get; private set; } = "";
 
@@ -114,7 +116,7 @@ namespace SharpAutomation
         /// </summary>
         /// <param name="toAddresses">The list of recipient email addresses.</param>
         /// <param name="subject">The subject of the notification email.</param>
-        /// <param name="htmlBody">The HTML content of the notification email (optional).</param>
+        /// <param name="htmlBody">The HTML content of the notification email.</param>
         /// <param name="ccAddresses">The list of CC (carbon copy) recipient email addresses (optional).</param>
         /// <param name="attachments">The list of file paths to be attached to the notification email (optional).</param>
         /// <param name="replyTo">The list of reply to email addresses (optional).</param>

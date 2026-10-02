@@ -8,30 +8,34 @@ namespace SharpAutomation
     public static class ExceptionExtensions
     {
         /// <summary>
-        /// Converts an exception to an HTML representation for display purposes.
+        /// Converts an exception to an HTML fragment, a heading and a table holding the exception's type name, message and
+        /// stack trace. The text is inserted without HTML encoding, and the inner exception is not included.
         /// </summary>
         /// <param name="exception">The exception to convert to HTML.</param>
-        /// <returns>An HTML representation of the exceptions for display.</returns>
+        /// <returns>The HTML fragment.</returns>
         public static string ToHTML(this Exception exception)
         {
             return new List<Exception>() { exception }.ToHTML();
         }
 
         /// <summary>
-        /// Converts an exception to a JSON representation.
+        /// Converts an exception to an indented JSON array holding one object with its <c>Message</c>, <c>StackTrace</c>
+        /// and <c>TypeName</c>. The inner exception is not included.
         /// </summary>
         /// <param name="exception">The exception to convert to JSON.</param>
-        /// <returns>A JSON representation of the exception.</returns>
+        /// <returns>The JSON text.</returns>
         public static string ToJSON(this Exception exception)
         {
             return new List<Exception>() { exception }.ToJSON();
         }
 
         /// <summary>
-        /// Logs an exception to a file asynchronously.
+        /// Appends the exception's timestamp, type name, message and stack trace to a log file.
         /// </summary>
         /// <param name="exception">The exception to log.</param>
-        /// <param name="logFilePath">The path to the file where exception will be logged. Default: AppDomain.CurrentDomain.BaseDirectory.</param>
+        /// <param name="logFilePath">The file to append to. Default: <c>Exceptions.log</c> in AppDomain.CurrentDomain.BaseDirectory.
+        /// A relative path is resolved against the current directory. The file is created if missing; its folder is not.</param>
+        /// <returns>A task that completes when the entry is written.</returns>
         public static async Task ToLogAsync(this Exception exception, string logFilePath = "")
         {
             await new List<Exception>() { exception }.ToLogAsync(logFilePath);

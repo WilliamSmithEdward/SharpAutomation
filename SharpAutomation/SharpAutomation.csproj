@@ -6,11 +6,13 @@
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Description>SharpAutomation is a C# library that helps you build smarter automation and workflows.</Description>
+    <Description>Helpers for automation scripts: run an action with retries and collect the exceptions it throws, format exceptions as HTML, JSON or log text, append entries to log files, and send HTML mail through an SMTP server.</Description>
+    <Authors>WilliamSmithE</Authors>
     <PackageReadmeFile>nugetREADME.md</PackageReadmeFile>
-    <RepositoryUrl></RepositoryUrl>
+    <RepositoryUrl>https://github.com/WilliamSmithEdward/SharpAutomation</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
 	<PackageProjectUrl>https://github.com/WilliamSmithEdward/SharpAutomation</PackageProjectUrl>
-    <PackageTags>sharp;automation;email;notifications;exceptionhandling;async</PackageTags>
+    <PackageTags>automation;retry;exceptions;logging;email;smtp;notifications</PackageTags>
 	<Deterministic>false</Deterministic>
 	<AssemblyVersion>1.0.6.3</AssemblyVersion>
 	<PackageVersion>1.0.6.3</PackageVersion>
