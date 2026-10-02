@@ -68,12 +68,15 @@ namespace SharpAutomation
 
         /// <summary>
         /// Appends each exception's timestamp, type name, message and stack trace to a log file. An empty list writes nothing.
+        /// A line break in a message or stack trace is followed by two spaces in the file.
         /// </summary>
         /// <param name="exceptions">The list of exceptions to log.</param>
         /// <param name="logFilePath">The file to append to. Default: <c>Exceptions.log</c> in AppDomain.CurrentDomain.BaseDirectory.
         /// A relative path is resolved against the current directory. The file is created if missing; its folder is not.</param>
         /// <returns>A task that completes when the entries are written.</returns>
         /// <exception cref="ArgumentNullException">Thrown when the 'exceptions' parameter is null.</exception>
+        /// <exception cref="IOException">Thrown when the file cannot be written, or another process holds it for more than
+        /// about two seconds.</exception>
         public static async Task ToLogAsync(this List<Exception> exceptions, string logFilePath = "")
         {
             if (exceptions == null)
@@ -88,18 +91,16 @@ namespace SharpAutomation
 
             foreach (var exception in exceptions)
             {
-                stringBuilder.AppendLine($"Timestamp: {DateTime.Now}");
-                stringBuilder.AppendLine($"Exception: {exception.GetType().FullName}");
-                stringBuilder.AppendLine($"Message: {exception.Message}");
-                stringBuilder.AppendLine($"StackTrace: {exception.StackTrace}");
+                stringBuilder.AppendLine(LogFile.Field("Timestamp", DateTime.Now.ToString()));
+                stringBuilder.AppendLine(LogFile.Field("Exception", exception.GetType().FullName));
+                stringBuilder.AppendLine(LogFile.Field("Message", exception.Message));
+                stringBuilder.AppendLine(LogFile.Field("StackTrace", exception.StackTrace));
                 stringBuilder.AppendLine();
-                stringBuilder.AppendLine("----------------------------------------------------------------------------");
+                stringBuilder.AppendLine(LogFile.Separator);
                 stringBuilder.AppendLine();
             }
 
-            using var writer = new StreamWriter(logFilePath, true, Encoding.UTF8);
-                
-            await writer.WriteLineAsync(stringBuilder.ToString());
+            await LogFile.AppendAsync(logFilePath, stringBuilder.ToString(), CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>

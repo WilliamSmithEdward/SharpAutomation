@@ -22,6 +22,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="SharpAutomation.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="nugetREADME.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

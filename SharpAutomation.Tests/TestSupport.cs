@@ -34,4 +34,12 @@ internal static class Thrown
         try { throw exception; }
         catch (Exception caught) { return caught; }
     }
+
+    /// <summary>The exception <paramref name="action"/> throws, with every frame it passed through.</summary>
+    public static Exception Exception(Action action)
+    {
+        try { action(); }
+        catch (Exception caught) { return caught; }
+        throw new InvalidOperationException("the action did not throw");
+    }
 }
