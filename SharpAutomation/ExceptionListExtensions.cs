@@ -17,9 +17,10 @@ namespace SharpAutomation
         /// <param name="exceptions">The list of exceptions to convert to HTML.</param>
         /// <returns>The HTML fragment.</returns>
         /// <exception cref="ArgumentNullException">Thrown when the 'exceptions' parameter is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when the list holds a null exception.</exception>
         public static string ToHTML(this List<Exception> exceptions)
         {
-            ArgumentNullException.ThrowIfNull(exceptions);
+            CheckList(exceptions);
 
             var html = new StringBuilder("<br /><br /><h2>Exceptions:</h2>");
 
@@ -48,10 +49,10 @@ namespace SharpAutomation
         /// <param name="exceptions">The list of exceptions to convert to JSON.</param>
         /// <returns>The JSON text.</returns>
         /// <exception cref="ArgumentNullException">Thrown when the 'exceptions' parameter is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when the list holds a null exception.</exception>
         public static string ToJSON(this List<Exception> exceptions)
         {
-            if (exceptions == null)
-                throw new ArgumentNullException(nameof(exceptions));
+            CheckList(exceptions);
 
             var exceptionDtos = exceptions.Select(exception => new
             {
@@ -75,13 +76,13 @@ namespace SharpAutomation
         /// A relative path is resolved against the current directory. The file is created if missing; its folder is not.</param>
         /// <returns>A task that completes when the entries are written.</returns>
         /// <exception cref="ArgumentNullException">Thrown when the 'exceptions' parameter is null.</exception>
+        /// <exception cref="ArgumentException">Thrown, before anything is written, when the list holds a null exception.</exception>
         /// <exception cref="IOException">Thrown when the file cannot be written, or another process holds it for more than
         /// about two seconds.</exception>
         public static async Task ToLogAsync(this List<Exception> exceptions, string logFilePath = "")
         {
-            if (exceptions == null)
-                throw new ArgumentNullException(nameof(exceptions));
-            
+            CheckList(exceptions);
+
             if (exceptions.Count == 0)
                 return;
 
@@ -110,8 +111,12 @@ namespace SharpAutomation
         /// <typeparam name="T">The type of exception to filter by.</typeparam>
         /// <param name="exceptions">The list of exceptions to filter.</param>
         /// <returns>A new list of the matching exceptions, in their original order.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the 'exceptions' parameter is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when the list holds a null exception.</exception>
         public static List<Exception> FilterByType<T>(this List<Exception> exceptions) where T : Exception
         {
+            CheckList(exceptions);
+
             return exceptions.Where(e => e.GetType() == typeof(T)).ToList();
         }
 
@@ -120,8 +125,12 @@ namespace SharpAutomation
         /// </summary>
         /// <param name="exceptions">The list of exceptions to flatten messages from.</param>
         /// <returns>A string containing flattened exception messages.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the 'exceptions' parameter is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when the list holds a null exception.</exception>
         public static string FlattenMessages(this List<Exception> exceptions)
         {
+            CheckList(exceptions);
+
             return string.Join(Environment.NewLine, exceptions.Select(e => e.Message));
         }
 
@@ -132,8 +141,12 @@ namespace SharpAutomation
         /// <typeparam name="T">The type of exception to check for.</typeparam>
         /// <param name="exceptions">The list of exceptions to check.</param>
         /// <returns>True if the list holds an exception of exactly that type; otherwise, false.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the 'exceptions' parameter is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when the list holds a null exception.</exception>
         public static bool ContainsType<T>(this List<Exception> exceptions) where T : Exception
         {
+            CheckList(exceptions);
+
             return exceptions.Any(e => e.GetType() == typeof(T));
         }
 
@@ -142,8 +155,12 @@ namespace SharpAutomation
         /// </summary>
         /// <param name="exceptions">The list of exceptions to count by type.</param>
         /// <returns>A dictionary from each exception type's full name to the number of exceptions of exactly that type.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the 'exceptions' parameter is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when the list holds a null exception.</exception>
         public static Dictionary<string, int> CountByType(this List<Exception> exceptions)
         {
+            CheckList(exceptions);
+
             var typeCounts = exceptions.GroupBy(x => x.GetType()).Select(x => new
             {
                 TypeName = x.Key.FullName ?? string.Empty,
@@ -151,6 +168,15 @@ namespace SharpAutomation
             }).ToDictionary(x => x.TypeName, x => x.Count);
 
             return typeCounts;
+        }
+
+        /// <summary>Refuses a null list, or a list that holds a null exception, before any of it is used.</summary>
+        private static void CheckList(List<Exception> exceptions)
+        {
+            ArgumentNullException.ThrowIfNull(exceptions);
+
+            if (exceptions.Contains(null!))
+                throw new ArgumentException("The list holds a null exception.", nameof(exceptions));
         }
     }
 }
