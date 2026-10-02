@@ -123,7 +123,11 @@ using SharpAutomation;
 var errors = new List<Exception>();
 TryAction.Run(() => File.ReadAllText("missing.txt"), _exceptionList: errors);
 
-var smtp = new SMTPServerConfiguration("smtp.example.com", "robot@example.com");
+var smtp = new SMTPServerConfiguration("smtp.example.com", "robot@example.com")
+{
+    Port = 25,          // the default
+    EnableSsl = true,   // STARTTLS, with the server's certificate checked
+};
 
 var mail = new NotificationConfiguration(
     toAddresses: ["operations@example.com"],
@@ -165,7 +169,8 @@ mail.SendNotification(smtp);   // the same as Notification.Send(smtp, mail)
 
 ## Mail
 
-- `Notification.Send(smtp, mail)` and `mail.SendNotification(smtp)` send one message through `System.Net.Mail.SmtpClient` to `SMTPServerAddress` on port 25. There is no setting for the port, TLS or a user name and password: the message goes unencrypted and unauthenticated, so it suits a relay on a network you trust.
+- `Notification.Send(smtp, mail)` and `mail.SendNotification(smtp)` send one message through `System.Net.Mail.SmtpClient` to `SMTPServerAddress` on `Port`, 25 unless you set it. There is no setting for a user name and password, so the server has to accept mail from the machine without them.
+- With `EnableSsl = true` the connection switches to TLS with STARTTLS before anything is sent. The server's certificate must be trusted by the machine and match `SMTPServerAddress`; a server that does not offer STARTTLS ends the send with `SmtpException`, and a certificate that fails the check with `AuthenticationException`, before any address or content is sent. `EnableSsl` is off by default, as it was in 1.0.6.3, and then the message, its attachments and any exception details in it cross the network unencrypted. Turn it on wherever the server offers STARTTLS.
 - The message is HTML (`IsBodyHtml`), from `FromAddress`, to every address in `ToAddresses`, with `CCAddresses` as CC (empty strings are skipped), `ReplyTo` as reply-to addresses, and each path in `Attachments` attached as a file.
 - `Send` throws `ArgumentException` when `ToAddresses` is empty. An address that is not a mail address throws `FormatException`, an attachment that cannot be read throws the `IOException` from opening it, and a failed send throws `SmtpException`. `SmtpClient` gives up on a server that does not answer after 100 seconds.
 - `System.Net.Mail` refuses a subject or an address that holds a line break, with `ArgumentException` or `FormatException`, so mail headers cannot be added through them.
@@ -181,7 +186,6 @@ mail.SendNotification(smtp);   // the same as Notification.Send(smtp, mail)
 
 These are fixed in the next release.
 
-- Mail cannot use TLS or a port other than 25.
 - `Notification.Send` does not dispose the message or the `SmtpClient`, so attachment files stay open, and cannot be deleted on Windows, until the garbage collector closes them, and the connection to the server is dropped without a `QUIT`.
 - `Log.WriteEntryAsync` is `async void`. An exception from it, such as `DirectoryNotFoundException` for a missing folder, is thrown on the thread pool and ends the process. A long entry may still be being written when it returns.
 - On Windows, two writes to the same log file at once, from `Log.WriteEntryAsync` or `ToLogAsync` in one process, throw `IOException`, which ends the process for `Log.WriteEntryAsync`.
