@@ -164,7 +164,8 @@ mail.SendNotification(smtp);   // the same as Notification.Send(smtp, mail)
 - `Notification.Send(smtp, mail)` and `mail.SendNotification(smtp)` send one message through `System.Net.Mail.SmtpClient` to `SMTPServerAddress` on `Port`, 25 unless you set it. There is no setting for a user name and password, so the server has to accept mail from the machine without them.
 - With `EnableSsl = true` the connection switches to TLS with STARTTLS before anything is sent. The server's certificate must be trusted by the machine and match `SMTPServerAddress`; a server that does not offer STARTTLS ends the send with `SmtpException`, and a certificate that fails the check with `AuthenticationException`, before any address or content is sent. `EnableSsl` is off by default, as it was in 1.0.6.3, and then the message, its attachments and any exception details in it cross the network unencrypted. Turn it on wherever the server offers STARTTLS.
 - The message is HTML (`IsBodyHtml`), from `FromAddress`, to every address in `ToAddresses`, with `CCAddresses` as CC (empty strings are skipped), `ReplyTo` as reply-to addresses, and each path in `Attachments` attached as a file.
-- `Send` throws `ArgumentException` when `ToAddresses` is empty. An address that is not a mail address throws `FormatException`, an attachment that cannot be read throws the `IOException` from opening it, and a failed send throws `SmtpException`. `SmtpClient` gives up on a server that does not answer after 100 seconds.
+- `Send` closes the attachment files and ends the session with `QUIT` before it returns, whether the mail went or not, so the files can be moved or deleted straight away.
+- `Send` throws `ArgumentNullException` for a null configuration or a null `ToAddresses`, and `ArgumentException` when `ToAddresses` is empty. An address that is not a mail address throws `FormatException`, an attachment that cannot be read throws the `IOException` from opening it, and a failed send throws `SmtpException`. `SmtpClient` gives up on a server that does not answer after 100 seconds.
 - `System.Net.Mail` refuses a subject or an address that holds a line break, with `ArgumentException` or `FormatException`, so mail headers cannot be added through them.
 - `NotificationConfiguration` keeps the lists you pass rather than copies, so adding to `ToAddresses` after construction adds a recipient.
 
@@ -177,11 +178,9 @@ mail.SendNotification(smtp);   // the same as Notification.Send(smtp, mail)
 
 These are fixed in the next release.
 
-- `Notification.Send` does not dispose the message or the `SmtpClient`, so attachment files stay open, and cannot be deleted on Windows, until the garbage collector closes them, and the connection to the server is dropped without a `QUIT`.
 - An `async` lambda passed to `TryAction.RunAsync` becomes `async void`: `RunAsync` returns `true` when the lambda reaches its first `await`, does not wait for it to finish, and an exception it throws later ends the process instead of reaching the exception list.
 - `TryAction.Run` and `RunAsync` wait `waitBetweenTriesSeconds` after the last failed attempt too.
 - A negative `retries` returns `false` without calling the action. A negative `waitBetweenTriesSeconds` throws `ArgumentOutOfRangeException` from `Run` or `RunAsync` after the first failed attempt, and one above 2,147,483 overflows when converted to milliseconds, so it throws the same or waits the wrong time.
-- `Notification.Send` with a null configuration or a null `ToAddresses` throws `NullReferenceException`.
 
 ## Attributions
 
