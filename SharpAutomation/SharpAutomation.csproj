@@ -14,7 +14,6 @@
     <RepositoryType>git</RepositoryType>
 	<PackageProjectUrl>https://github.com/WilliamSmithEdward/SharpAutomation</PackageProjectUrl>
     <PackageTags>automation;retry;exceptions;logging;email;smtp;notifications</PackageTags>
-	<Deterministic>false</Deterministic>
 	<AssemblyVersion>1.0.6.3</AssemblyVersion>
 	<PackageVersion>1.0.6.3</PackageVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
