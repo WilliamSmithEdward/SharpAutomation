@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text;
 using System.Text.Json;
 
 namespace SharpAutomation
@@ -10,32 +11,34 @@ namespace SharpAutomation
     {
         /// <summary>
         /// Converts a list of exceptions to an HTML fragment, a heading and a table holding each exception's type name,
-        /// message and stack trace. The text is inserted without HTML encoding, and inner exceptions are not included.
+        /// message and stack trace. The text is HTML-encoded, so it shows as written and cannot add markup; inner
+        /// exceptions are not included.
         /// </summary>
         /// <param name="exceptions">The list of exceptions to convert to HTML.</param>
         /// <returns>The HTML fragment.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the 'exceptions' parameter is null.</exception>
         public static string ToHTML(this List<Exception> exceptions)
         {
-            var html = "<br /><br /><h2>Exceptions:</h2>";
+            ArgumentNullException.ThrowIfNull(exceptions);
 
-            html += "<table style='border-collapse: collapse; width: 100%;'>";
+            var html = new StringBuilder("<br /><br /><h2>Exceptions:</h2>");
+
+            html.Append("<table style='border-collapse: collapse; width: 100%;'>");
 
             foreach (var exception in exceptions)
             {
-                html += "<tr>";
-                html += "<td colspan='2'><strong>Type:</strong></td></tr>";
-                html += "<tr><td colspan='2' style='padding-left: 20px;'>" + exception.GetType().FullName + "</td></tr>";
-                html += "<tr><td colspan='2'><strong>Message:</strong></td></tr>";
-                html += "<tr><td colspan='2' style='padding-left: 20px;'>" + exception.Message + "</td></tr>";
-                html += "<tr><td colspan='2'><strong>Stack Trace:</strong></td></tr>";
-                html += "<tr><td colspan='2'><div style='padding-left: 20px;'><pre>" + exception.StackTrace + "</pre></div></td></tr>";
-                html += "<tr><td colspan='2' style='padding: 10px 0;'></td></tr>";
-                html += "</tr>";
+                html.Append("<tr><td colspan='2'><strong>Type:</strong></td></tr>");
+                html.Append("<tr><td colspan='2' style='padding-left: 20px;'>").Append(WebUtility.HtmlEncode(exception.GetType().FullName)).Append("</td></tr>");
+                html.Append("<tr><td colspan='2'><strong>Message:</strong></td></tr>");
+                html.Append("<tr><td colspan='2' style='padding-left: 20px;'>").Append(WebUtility.HtmlEncode(exception.Message)).Append("</td></tr>");
+                html.Append("<tr><td colspan='2'><strong>Stack Trace:</strong></td></tr>");
+                html.Append("<tr><td colspan='2'><div style='padding-left: 20px;'><pre>").Append(WebUtility.HtmlEncode(exception.StackTrace)).Append("</pre></div></td></tr>");
+                html.Append("<tr><td colspan='2' style='padding: 10px 0;'></td></tr>");
             }
 
-            html += "</table>";
+            html.Append("</table>");
 
-            return html;
+            return html.ToString();
         }
 
         /// <summary>

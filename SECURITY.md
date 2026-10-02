@@ -56,9 +56,9 @@ an address, so headers cannot be added through them.
 Exception messages and stack traces can hold file paths, server and user
 names, and sometimes connection strings or other secrets. `ToHTML`,
 `ToJSON` and the log methods copy them unchanged, so send the mail and keep
-the log files only where those details may be read. In 1.0.6.3 `ToHTML`
-does not HTML-encode what it inserts, so a message that quotes input you do
-not control can put HTML into the mail.
+the log files only where those details may be read. `ToHTML` HTML-encodes
+what it inserts; in 1.0.6.3 it did not, so there a message that quotes
+input you do not control can put markup into the mail.
 
 ### Log files
 
