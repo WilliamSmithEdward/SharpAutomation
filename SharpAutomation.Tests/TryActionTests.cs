@@ -74,7 +74,7 @@ public class TryActionTests
     {
         var errors = new List<Exception>();
 
-        bool ok = await TryAction.RunAsync(() => throw new IOException("busy"), retries: 1, _exceptionList: errors);
+        bool ok = await TryAction.RunAsync((Action)(() => throw new IOException("busy")), retries: 1, _exceptionList: errors);
 
         Assert.False(ok);
         Assert.Equal(2, errors.Count);
