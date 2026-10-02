@@ -98,7 +98,7 @@ TryAction.Run(() => File.ReadAllText("missing.txt"), _exceptionList: errors);
 
 await errors.ToLogAsync("errors.log");         // appends one block per exception
 await errors[0].ToLogAsync("errors.log");      // the same for a single exception
-Log.WriteEntryAsync("Import finished", "import.log");
+await Log.AppendEntryAsync("Import finished", "import.log");
 
 Console.WriteLine(File.ReadAllText("import.log"));
 // Timestamp: 10/2/2026 3:04:05 PM   (local time, in the current culture)
@@ -152,12 +152,12 @@ mail.SendNotification(smtp);   // the same as Notification.Send(smtp, mail)
 ## Log files
 
 - `ToLogAsync(logFilePath)` appends one block per exception: `Timestamp:`, `Exception:`, `Message:` and `StackTrace:` lines, then a line of dashes. An empty list writes nothing. Without a path it appends to `Exceptions.log` in `AppDomain.CurrentDomain.BaseDirectory`, the application's folder.
-- `Log.WriteEntryAsync(entry, logFilePath)` appends a `Timestamp:` line, an `Entry:` line and a line of dashes. Without a path it creates a new file in the application's folder for each second, named from the local time as `yyyyMMdd_hhmmss.log`, so each call usually writes its own file.
+- `Log.AppendEntryAsync(entry, logFilePath, cancellationToken)` appends a `Timestamp:` line, an `Entry:` line and a line of dashes, and returns a task to await. `Log.WriteEntryAsync(entry, logFilePath)` does the same synchronously: despite its name it returns `void` once the entry is written, and throws to the caller if it cannot be. Without a path both create a new file in the application's folder for each second, named from the local time as `yyyyMMdd_HHmmss.log` with a 24-hour clock, so each call usually writes its own file.
+- A line break in an entry, a message or a stack trace is followed by two spaces in the file. Only the library starts a line at the first column, so logged text cannot pass for a separator or another entry.
 - A relative path is resolved against the current directory, not the application's folder. The file is created when it does not exist, but its folder is not. Files are written as UTF-8 with a byte order mark.
 - Timestamps are the local time, formatted in the current culture.
 - Nothing rotates or deletes log files; they grow until you remove them.
-- The file is opened for writing and shared only with readers. On Windows, a second write to the same file while the first still has it open, from this process or another, throws `IOException`.
-- `Log.WriteEntryAsync` returns `void`, so it cannot be awaited and an exception it throws is not returned to you; see "Known problems in 1.0.6.3" below.
+- Writes to one file from the same process take turns. The file is shared only with readers while it is written; when another process has it open, a write waits and tries again for about two seconds, then throws `IOException`.
 
 ## Mail
 
@@ -171,7 +171,6 @@ mail.SendNotification(smtp);   // the same as Notification.Send(smtp, mail)
 ## Security
 
 - Exception messages and stack traces can hold file paths, server names, user names, and sometimes connection strings or other secrets. `ToHTML`, `ToJSON` and the log methods copy them unchanged, so send the mail and keep the log files only where those details may be read.
-- A line break in a logged entry or message starts a new line in the log file, so text that you log can look like another entry.
 - An attachment path is read with the permissions of the process. Do not build one from input you do not control.
 
 ## Known problems in 1.0.6.3
@@ -179,10 +178,6 @@ mail.SendNotification(smtp);   // the same as Notification.Send(smtp, mail)
 These are fixed in the next release.
 
 - `Notification.Send` does not dispose the message or the `SmtpClient`, so attachment files stay open, and cannot be deleted on Windows, until the garbage collector closes them, and the connection to the server is dropped without a `QUIT`.
-- `Log.WriteEntryAsync` is `async void`. An exception from it, such as `DirectoryNotFoundException` for a missing folder, is thrown on the thread pool and ends the process. A long entry may still be being written when it returns.
-- On Windows, two writes to the same log file at once, from `Log.WriteEntryAsync` or `ToLogAsync` in one process, throw `IOException`, which ends the process for `Log.WriteEntryAsync`.
-- A line break in a logged message or entry can make text look like a separate log entry.
-- The default log file name uses a 12-hour clock with no AM or PM: a file written at 1:05 PM is named as if written at 1:05 AM, so the names do not sort by time.
 - An `async` lambda passed to `TryAction.RunAsync` becomes `async void`: `RunAsync` returns `true` when the lambda reaches its first `await`, does not wait for it to finish, and an exception it throws later ends the process instead of reaching the exception list.
 - `TryAction.Run` and `RunAsync` wait `waitBetweenTriesSeconds` after the last failed attempt too.
 - A negative `retries` returns `false` without calling the action. A negative `waitBetweenTriesSeconds` throws `ArgumentOutOfRangeException` from `Run` or `RunAsync` after the first failed attempt, and one above 2,147,483 overflows when converted to milliseconds, so it throws the same or waits the wrong time.

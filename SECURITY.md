@@ -29,10 +29,10 @@ starts no process. What it reads, writes and reaches:
 - **Files read.** `Notification.Send` reads each file named in
   `NotificationConfiguration.Attachments`, to attach it. Nothing else is
   read.
-- **Files written.** `Log.WriteEntryAsync` and `ToLogAsync` append to the
-  file the caller names, or, without a name, to a file in
-  `AppDomain.CurrentDomain.BaseDirectory`: `Exceptions.log` for
-  `ToLogAsync`, a file named from the local time for `Log.WriteEntryAsync`.
+- **Files written.** `Log.WriteEntryAsync`, `Log.AppendEntryAsync` and
+  `ToLogAsync` append to the file the caller names, or, without a name, to
+  a file in `AppDomain.CurrentDomain.BaseDirectory`: `Exceptions.log` for
+  `ToLogAsync`, a file named from the local time for the `Log` methods.
   Nothing else is written.
 - **Code run.** `TryAction.Run` and `RunAsync` call the delegate the caller
   passes, and nothing else.
@@ -69,7 +69,9 @@ input you do not control can put markup into the mail.
 ### Log files
 
 Nothing rotates or deletes the log files. Point them at a folder the
-process may write and others may not, and remove old files yourself.
+process may write and others may not, and remove old files yourself. A
+line break in logged text is followed by two spaces in the file, so text
+from outside cannot pass for a separate entry; in 1.0.6.3 it could.
 
 ## How the code is checked
 
