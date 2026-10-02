@@ -11,9 +11,11 @@ namespace SharpAutomation
         /// Sends an HTML mail through the SMTP server on <see cref="SMTPServerConfiguration.Port"/>, without
         /// authentication. With <see cref="SMTPServerConfiguration.EnableSsl"/> the connection is encrypted with
         /// STARTTLS and the server's certificate is checked before anything is sent; otherwise the mail goes unencrypted.
+        /// The attachment files are closed and the session ended before it returns, whether the send succeeded or not.
         /// </summary>
         /// <param name="smtpConfiguration">The SMTP server configuration.</param>
         /// <param name="notificationConfiguration">The notification configuration.</param>
+        /// <exception cref="ArgumentNullException">Thrown when either configuration, or the 'toAddresses' list, is null.</exception>
         /// <exception cref="ArgumentException">Thrown when the 'toAddresses' list in notification configuration is empty.</exception>
         /// <exception cref="FormatException">Thrown when an address is not a valid mail address.</exception>
         /// <exception cref="SmtpException">Thrown when the server cannot be reached, refuses the mail, or, with
@@ -23,10 +25,18 @@ namespace SharpAutomation
         /// match its name.</exception>
         public static void Send(SMTPServerConfiguration smtpConfiguration, NotificationConfiguration notificationConfiguration)
         {
+            ArgumentNullException.ThrowIfNull(smtpConfiguration);
+            ArgumentNullException.ThrowIfNull(notificationConfiguration);
+
+            if (notificationConfiguration.ToAddresses == null)
+                throw new ArgumentNullException("toAddresses", "The 'toAddresses' list must not be null.");
+
             if (notificationConfiguration.ToAddresses.Count == 0)
                 throw new ArgumentException("The 'toAddresses' list must not be empty.");
 
-            var message = new MailMessage
+            // Disposing the message closes the attachment files, those added before a failure included, and
+            // disposing the client ends the session with QUIT.
+            using var message = new MailMessage
             {
                 From = new MailAddress(smtpConfiguration.FromAddress),
                 Subject = notificationConfiguration.Subject,
@@ -51,10 +61,12 @@ namespace SharpAutomation
                 foreach (var attachment in notificationConfiguration.Attachments)
                     message.Attachments.Add(new Attachment(attachment));
 
-            new SmtpClient(smtpConfiguration.SMTPServerAddress, smtpConfiguration.Port)
+            using var client = new SmtpClient(smtpConfiguration.SMTPServerAddress, smtpConfiguration.Port)
             {
                 EnableSsl = smtpConfiguration.EnableSsl
-            }.Send(message);
+            };
+
+            client.Send(message);
         }
     }
 
