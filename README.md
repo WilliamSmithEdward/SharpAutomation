@@ -169,7 +169,7 @@ mail.SendNotification(smtp);   // the same as Notification.Send(smtp, mail)
 - `ToHTML` returns an HTML fragment, a heading and a table, for the body of a mail. It HTML-encodes the type name, message and stack trace, so a message such as `<b>Disk full</b>` shows as written, tags and all, and cannot add markup to the mail.
 - `ToJSON` returns an indented JSON array of objects with `Message`, `StackTrace` and `TypeName`. `StackTrace` is `null` for an exception that was never thrown. `System.Text.Json` escapes `<`, `>` and `&` in the strings.
 - `FilterByType<T>()` and `ContainsType<T>()` match the exact type: a `FileNotFoundException` is not counted as an `IOException`. `CountByType()` returns a dictionary from each type's full name to its count. `FlattenMessages()` joins the messages with `Environment.NewLine`.
-- These methods throw `ArgumentNullException` for a null list or a null exception.
+- These methods throw `ArgumentNullException` for a null list or a null exception, and `ArgumentException` for a list that holds a null exception, before they use any of it.
 
 ## Log files
 
