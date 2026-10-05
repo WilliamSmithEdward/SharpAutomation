@@ -5,7 +5,7 @@
 [![CI](https://github.com/WilliamSmithEdward/SharpAutomation/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/WilliamSmithEdward/SharpAutomation/actions/workflows/ci.yml)
 [![Security](https://github.com/WilliamSmithEdward/SharpAutomation/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/WilliamSmithEdward/SharpAutomation/actions/workflows/security.yml)
 [![Malware scan](https://github.com/WilliamSmithEdward/SharpAutomation/actions/workflows/malware-scan.yml/badge.svg?branch=main)](https://github.com/WilliamSmithEdward/SharpAutomation/actions/workflows/malware-scan.yml)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/WilliamSmithEdward/SharpAutomation/badge)](https://scorecard.dev/viewer/?uri=github.com/WilliamSmithEdward/SharpAutomation)
+[![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/WilliamSmithEdward/SharpAutomation)](https://scorecard.dev/viewer/?uri=github.com/WilliamSmithEdward/SharpAutomation)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/WilliamSmithEdward/SharpAutomation/blob/main/LICENSE)
 
 SharpAutomation is a small library for automation scripts and scheduled jobs. It runs an action with retries and collects the exceptions it throws, turns exceptions into HTML, JSON or log text, appends entries to log files, and sends HTML mail through an SMTP server.
