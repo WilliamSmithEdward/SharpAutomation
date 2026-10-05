@@ -9,13 +9,13 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Description>Helpers for automation scripts: run an action with retries and collect the exceptions it throws, format exceptions as HTML, JSON or log text, append entries to log files, and send HTML mail through an SMTP server.</Description>
     <Authors>WilliamSmithE</Authors>
-    <PackageReadmeFile>nugetREADME.md</PackageReadmeFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/WilliamSmithEdward/SharpAutomation</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
 	<PackageProjectUrl>https://github.com/WilliamSmithEdward/SharpAutomation</PackageProjectUrl>
     <PackageTags>automation;retry;exceptions;logging;email;smtp;notifications</PackageTags>
-	<AssemblyVersion>2.0.0</AssemblyVersion>
-	<PackageVersion>2.0.0</PackageVersion>
+	<AssemblyVersion>2.0.1</AssemblyVersion>
+	<PackageVersion>2.0.1</PackageVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>SharpAutomation.png</PackageIcon>
   </PropertyGroup>
@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="nugetREADME.md">
+    <None Include="../README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

@@ -10,6 +10,12 @@ nuget.org nor the READMEs carried release notes for them. Versions 1.0.0 to
 1.0.6.1 are unlisted on nuget.org; 1.0.6.2 and 1.0.6.3 are listed. 1.0.0 to
 1.0.6.2 target net7.0, and 1.0.6.3 targets net8.0.
 
+## [2.0.1] - 2026-10-04
+
+* The NuGet package now embeds the root GitHub `README.md`, including its badges, as its only README. The OpenSSF Scorecard badge is served through `img.shields.io`, which NuGet supports.
+* CI and Publish verify that the packaged README exactly matches the root file.
+* No library API or runtime behavior changes.
+
 ## [2.0.0] - 2026-10-02
 
 Mail can use STARTTLS and any port, and closes its attachment files and the session when it is done. `ToHTML` encodes what it puts into a mail. Log writes finish before they return, take turns on a shared file, wait briefly for a file another process holds, and cannot be forged by line breaks in logged text. `TryAction.RunAsync` awaits `async` lambdas and can be cancelled. Some of the fixes change what callers see, hence the major version. The library has no package dependencies.
